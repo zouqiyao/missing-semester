@@ -1,15 +1,15 @@
-2026年 10月 20日 星期二 10:06:33 CST
+2026年 10月 20日 星期二 13:15:06 CST
 接下来要输出的是shell的前10条指令
-cd missing-semester/
+ls
+cd notes
+ls
+cd ..
 cd homework
 ls
-cd 2027
-cd  homework
-vim homework1.sh
-./homework1.sh
-ls -ltr
-chmod 766 homework1.sh
+vi output
+vi output.txt
 ./homework1.sh 
+vim output.txt 
 接下来要输出的是note.md的字数
 4877
 接下来要输出的是c++_note.md的字数
