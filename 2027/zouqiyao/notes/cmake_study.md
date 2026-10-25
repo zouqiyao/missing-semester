@@ -121,3 +121,55 @@ b.cpp 中guide() 函数找不到 b.o中就会把guide()地址空出来等待 Lin
 	#告诉linker 这个静态库 可以在其中找到 需要的.o 文件
 	target_link_libraries(可执行文件名 PRIVATE mlib)
 ```
+
+## ROS noetic
+* 它是一个以节点为基础 的 分散式的系统  就是不同的功能代码分别在不同的节点下运行 通过 建立通讯来进行数据交互
+* 好处：不同功能的代码可以在不同的硬件环境下跑  不需要一个硬件跑完  大大提高效率
+
+### ros 环境
+	source /opt/ros/noetic/setup.bash 执行setup.bash 脚本
+	这个脚本会干什么呢？
+
+	setup.bash 主要设置这些环境变量：
+	变量	作用
+	PATH	把 /opt/ros/noetic/bin 加进路径，这样你才能直接敲 roscore、rosrun、roslaunch、rosnode 等命令
+	ROS_ROOT	指向 /opt/ros/noetic/share/ros
+	ROS_PACKAGE_PATH	ROS 找包的路径
+	PYTHONPATH	让 Python 能找到 ROS 的 Python 模块
+	LD_LIBRARY_PATH	让程序能找到 ROS 的动态库
+	ROS_MASTER_URI、ROS_HOSTNAME 等	网络相关（有的脚本会设默认值）
+
+	注意奥， 这些变量都处于 当前bash 进程的内存里   (也就是说 你新开一个 bash 也就是新开一个终端 这些变量都会被清0重置  这时候就有要再跑一次setup.bash 脚本)
+
+	但是 我写了自己的 包(可以理解为一个函数) 或者 我修改了ros本身的包  我想让ros 运行我的包该怎么办呢？
+	这时候catkin就上场了
+		
+	你的包放在 /root/catkin_ws/src/my_pkg/（含 package.xml）
+			│
+			│ catkin_make 编译
+			▼
+	devel/setup.bash 生成，设置 ROS_PACKAGE_PATH 包含 /root/catkin_ws/src   (catkin 会自动更新 setup.bash 这个脚本哦！ 跟我说：好聪明的catkin)
+			│
+			│ 你 source devel/setup.bash
+			▼
+	当前终端 ROS_PACKAGE_PATH = /root/catkin_ws/src:/opt/ros/noetic/share
+			│
+			│ 你敲 rosrun my_pkg xxx
+			▼
+	rosrun 去 ROS_PACKAGE_PATH 列出的目录里递归找名为 my_pkg 的 package.xml
+			│
+			▼
+	找到 /root/catkin_ws/src/my_pkg，运行它
+
+	所以！ ros系统自带了一个 setup.bash 它在/opt/ros/noetic/setup.bash 这里
+		  你的工作空间由catkin帮你管理了一个 setup.basn 它在  root/ros_ws/devel/setup.bash (如果你的工作文件夹叫做ros_ws) 这里
+
+	你要干的事情： 
+		source /opt/ros/noetic/setup.bash 将一些 ros包和命令路径 放进当前的 bash 内存里 当你对bash 说 rosrun 的时候 它就会找到rosrun 这个命令 指向的可执行程序
+		source /root/ros_ws/devel/setup.bash  将你的包 路径 放到 bash 的内存里面
+
+	注意奥! 一定要先 "source ros" 再 "source 你的工作空间"
+
+	原因：setup.bash 在写入bash 内存里的变量的时候 是在头部插入 比如: ROS_PACKAGE_PATH=新路径:$ROS_PACKAGE_PATH   # 把新路径放在前面
+	bash 在查找包的时候 会找到 第一个路径 （第一个路径找到了也就不再找了）
+	如果你改过了某一个 package 或者 你的 package 和 ros 的package 同名  你想让ros运行你工作空间的包的...那么你就得让 "source 工作空间" 在 "source ros" 后面
