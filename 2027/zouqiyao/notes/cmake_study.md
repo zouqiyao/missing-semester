@@ -125,7 +125,7 @@ b.cpp 中guide() 函数找不到 b.o中就会把guide()地址空出来等待 Lin
 ## ROS noetic
 * 它是一个以节点为基础 的 分散式的系统  就是不同的功能代码分别在不同的节点下运行 通过 建立通讯来进行数据交互
 * 好处：不同功能的代码可以在不同的硬件环境下跑  不需要一个硬件跑完  大大提高效率
-
+* 每个节点都会完成一个 事情 比如导航
 ### ros 环境
 	source /opt/ros/noetic/setup.bash 执行setup.bash 脚本
 	这个脚本会干什么呢？
@@ -173,3 +173,7 @@ b.cpp 中guide() 函数找不到 b.o中就会把guide()地址空出来等待 Lin
 	原因：setup.bash 在写入bash 内存里的变量的时候 是在头部插入 比如: ROS_PACKAGE_PATH=新路径:$ROS_PACKAGE_PATH   # 把新路径放在前面
 	bash 在查找包的时候 会找到 第一个路径 （第一个路径找到了也就不再找了）
 	如果你改过了某一个 package 或者 你的 package 和 ros 的package 同名  你想让ros运行你工作空间的包的...那么你就得让 "source 工作空间" 在 "source ros" 后面
+### 节点管理器 ROS Master
+* 为节点提供命名和注册服务
+* 跟踪和记录话题/服务通信，辅助节点互相连接，查找
+* 提供参数服务器  一个全局的对象字典  变量名：变量值 可供每一个节点读写
