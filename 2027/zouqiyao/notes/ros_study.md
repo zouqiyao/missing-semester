@@ -459,3 +459,38 @@ b.cpp 中guide() 函数找不到 b.o中就会把guide()地址空出来等待 Lin
 	12. 如果在我自己的工作空间 里面 source 那么我工作空间的 root层级地址 会插入CMAKE_PREFIX_PATH 的头部优先查找 
 	13. 人话就是 如果 一个代码要依赖 roscpp 刚好我在工作空间里改了 roscpp 我不想用系统的 roscpp  source 系统的setup.bash 再 source我自己工作空间 的setup.bash 那么 我工作空间的root层级地址就会插入 CMAKE_PREFIX_PATH 的头部 被优先查找
 	14. 那么 这个代码用到的就是 我自己改的 roscpp 了
+### 撰写一个 Publiser
+```cpp
+# include <ros/ros.h>  // 包含了ros命名空间  还有里面的自由 函数 如 ros:: init()
+# include <geometry_msg/Twist.h> 其实.h 文件才是c++语言 Twist 是 geometry包里面的一个 Twist.msg 文件格式 只不过catkin 在编译时 将 Twist.msg 写成了 c++的结构体 Twist 放在了 Twist.h 这个文件里面  这里个代码里的 Twist 都是一个结构体
+
+int main(int argc, char **argv)  //atgc 这个是什么呢 这个记录了 终端在调用这个节点时的 字符个数
+                                 //atgv 这个是一个字符串数组 记录了终端在调用这个节点时的 字符串内容
+                                 // 比如 终端输入 rosrun learning_topic turtle_publisher 这个命令时 argc 就是3  
+                                 //argv[0] 就是 “rosrun“ argv[1] 就是 “learning_topic“ argv[2] 就是 “turtle_publisher“
+
+{
+
+    ros_init(argc,argv,"turtle_publisher"); //首先roscpp 这个库是一个整个ros系统都可以调用的全局函数库
+                                            //"运行状态" 就是 在节点运行起来以后 roscpp里面的函数在内存里 维护的 一堆全局变量 
+                                            // 这些全局变量 对于当前进程是可见的 对于其他进程（跑起来的节点）是不可见的
+
+                                            //package.xml <build_depend>roscpp<buile_depend/> 还有 CMakeLists.txt 里面的 find_package(catkin REQUIRED COMPONENTS roscpp ) target_link_libraries()
+                                            //它们是在告诉 catkin 这个包在编译的时候需要roscpp 这个库
+                                            //include<ros/ros.h> 就是将roscpp 这个库里的函数 加载进来
+                                            //当我们在代码里调用 roscpp 里面的函数比如 ros::init() 就会用到roscpp里面写好的init()
+                                            //ros::init() 干了点什么？ 在这个进程里面 维护了 一堆全局变量           
+                                            // 这些全局变量 有什么呢： ros Master的地址 "turtle_publisher" 这个节点名 还有这个节点的IP地址 端口号(tcp监听用)
+ 
+
+    ros:: NodeHandle n;  // NodeHandle 是一个类 它用来干什么呢？
+                         // 首先 在这个代码跑起来的时候 我们已经 创建了一个节点！ 我们还想将这个节点 作为publisher 注册到ros Master 
+                         // 我们可以如何做呢? 我们可以自己 向ros Master 注册... 自己写函数 ..自己传参数... 
+                         // 晕死...老大每次我们都要自己写函数注册节点吗？ 这太麻烦..
+                         // 所以我们就需要一个roscpp 里的"奴隶" 一个NodeHandle 类对象 
+                         // NodeHandle 里面封装了向rosMaster 注册节点 声明成为publiser 或者 声明成为 subscriber 的函数
+                         // 所以每次我们想注册节点到 rosMaster 就可以用 NodeHandle 的对象... 让它去干
+                    
+
+}
+```
